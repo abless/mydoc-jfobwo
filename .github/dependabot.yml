@@ -1,0 +1,134 @@
+# GitHub Dependabot configuration file for the Health Advisor application
+# This file configures automated dependency updates for:
+# - Backend Node.js dependencies
+# - Mobile React Native dependencies
+# - GitHub Actions workflows
+
+version: 2
+updates:
+  # Backend dependencies configuration
+  - package-ecosystem: "npm"
+    directory: "/src/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "health-advisor-team"
+    assignees:
+      - "health-advisor-team"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    groups:
+      express-ecosystem:
+        patterns:
+          - "express*"
+          - "cors"
+          - "helmet"
+          - "compression"
+          - "morgan"
+        update-types:
+          - "minor"
+          - "patch"
+      mongodb-ecosystem:
+        patterns:
+          - "mongoose*"
+          - "mongodb*"
+        update-types:
+          - "minor"
+          - "patch"
+      authentication:
+        patterns:
+          - "passport*"
+          - "jsonwebtoken"
+          - "bcrypt"
+        update-types:
+          - "minor"
+          - "patch"
+      development-tools:
+        patterns:
+          - "eslint*"
+          - "jest*"
+          - "typescript"
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "multer"
+        versions: ["2.x"]
+    versioning-strategy: "auto"
+
+  # Mobile React Native dependencies configuration
+  - package-ecosystem: "npm"
+    directory: "/src/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "health-advisor-team"
+    assignees:
+      - "health-advisor-team"
+    labels:
+      - "dependencies"
+      - "mobile"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    groups:
+      react-native-core:
+        patterns:
+          - "react"
+          - "react-native"
+          - "@react-navigation/*"
+        update-types:
+          - "minor"
+          - "patch"
+      react-native-ui:
+        patterns:
+          - "react-native-*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing-tools:
+        patterns:
+          - "jest*"
+          - "@testing-library/*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "react-native"
+        versions: [">0.71.0"]
+    versioning-strategy: "auto"
+
+  # GitHub Actions workflow dependencies configuration
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "health-advisor-team"
+    assignees:
+      - "health-advisor-team"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
