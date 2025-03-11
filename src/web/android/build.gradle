@@ -1,0 +1,25 @@
+repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath('com.android.tools.build:gradle:7.3.1')
+        classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20')
+        classpath('com.facebook.react:react-native-gradle-plugin:0.71.0')
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+        maven { url "$rootDir/../node_modules/react-native/android" }
+        maven { url "https://jitpack.io" }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
