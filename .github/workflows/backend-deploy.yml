@@ -1,0 +1,163 @@
+name: Backend Deploy # Backend Deploy Workflow
+
+on:
+  workflow_run:
+    workflows: ["Backend Build"]
+    branches: [main]
+    types: [completed]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: health-advisor-backend
+  TF_VERSION: 1.3.0
+  NODE_VERSION: 18.x
+
+jobs:
+  prepare-deployment:
+    name: Prepare Deployment
+    runs-on: ubuntu-latest
+    if: "${{ github.event.workflow_run.conclusion == 'success' }}"
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Download backend dist # actions/download-artifact@v3
+        uses: actions/download-artifact@v3 # actions/download-artifact@v3
+        with:
+          name: backend-dist
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: src/backend/dist
+      - name: Download build info # actions/download-artifact@v3
+        uses: actions/download-artifact@v3 # actions/download-artifact@v3
+        with:
+          name: build-info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: build-info
+      - name: Read build ID
+        id: build-info
+        run: echo "id=$(cat build-info/build-info.txt)" >> $GITHUB_OUTPUT
+    outputs:
+      build_id: ${{ steps.build-info.outputs.id }}
+
+  build-and-push-image:
+    name: Build and Push Docker Image
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Set up Docker Buildx # docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v2 # docker/setup-buildx-action@v2
+      - name: Configure AWS credentials # aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR # aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1 # aws-actions/amazon-ecr-login@v1
+      - name: Build and push Docker image # docker/build-push-action@v4
+        uses: docker/build-push-action@v4 # docker/build-push-action@v4
+        with:
+          context: src/backend
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ needs.prepare-deployment.outputs.build_id }},${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+    outputs:
+      image_uri: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ needs.prepare-deployment.outputs.build_id }}
+
+  deploy-to-development:
+    name: Deploy to Development
+    needs: [prepare-deployment, build-and-push-image]
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Configure AWS credentials # aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Terraform # hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v2 # hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/dev
+        run: terraform init
+      - name: Terraform Apply
+        working-directory: infrastructure/terraform/environments/dev
+        run: terraform apply -auto-approve -var="backend_image=${{ needs.build-and-push-image.outputs.image_uri }}" -var="build_id=${{ needs.prepare-deployment.outputs.build_id }}"
+      - name: Verify Deployment
+        run: curl --retry 5 --retry-delay 10 --retry-connrefused https://api-dev.healthadvisor.com/health
+
+  deploy-to-staging:
+    name: Deploy to Staging
+    needs: [prepare-deployment, build-and-push-image, deploy-to-development]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Configure AWS credentials # aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Terraform # hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v2 # hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/staging
+        run: terraform init
+      - name: Terraform Apply
+        working-directory: infrastructure/terraform/environments/staging
+        run: terraform apply -auto-approve -var="backend_image=${{ needs.build-and-push-image.outputs.image_uri }}" -var="build_id=${{ needs.prepare-deployment.outputs.build_id }}"
+      - name: Verify Deployment
+        run: curl --retry 5 --retry-delay 10 --retry-connrefused https://api-staging.healthadvisor.com/health
+
+  deploy-to-production:
+    name: Deploy to Production
+    needs: [prepare-deployment, build-and-push-image, deploy-to-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Configure AWS credentials # aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Terraform # hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v2 # hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/prod
+        run: terraform init
+      - name: Terraform Apply
+        working-directory: infrastructure/terraform/environments/prod
+        run: terraform apply -auto-approve -var="backend_image=${{ needs.build-and-push-image.outputs.image_uri }}" -var="build_id=${{ needs.prepare-deployment.outputs.build_id }}"
+      - name: Verify Deployment
+        run: curl --retry 5 --retry-delay 10 --retry-connrefused https://api.healthadvisor.com/health
+
+  post-deployment:
+    name: Post-Deployment Tasks
+    needs: [deploy-to-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code # actions/checkout@v3
+        uses: actions/checkout@v3 # actions/checkout@v3
+      - name: Create deployment tag
+        run: git tag backend-deployment-$(date +'%Y%m%d%H%M%S') && git push --tags
+      - name: Notify deployment success
+        run: curl -X POST -H 'Content-Type: application/json' -d '{"text":"Backend deployment successful: ${{ needs.prepare-deployment.outputs.build_id }}"}' ${{ secrets.SLACK_WEBHOOK_URL }}
