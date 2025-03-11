@@ -1,0 +1,45 @@
+node_modules
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Development files
+.git
+.gitignore
+.eslintrc.json
+nodemon.json
+
+# Build and test artifacts
+dist
+coverage
+**/*.test.ts
+**/*.spec.ts
+tests
+
+# Environment and secrets
+.env
+.env.*
+
+# Documentation and non-essential files
+README.md
+docs
+
+# Logs and temporary files
+logs
+*.log
+tmp
+temp
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Docker files
+.dockerignore
+
+# Local development data
+data
+uploads
