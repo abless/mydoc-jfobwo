@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color definitions -->
+    <color name="colorPrimary">#4A90E2</color>
+    <color name="colorPrimaryDark">#2C5282</color>
+    <color name="colorAccent">#FF8C42</color>
+    <color name="textColorPrimary">#333333</color>
+    <color name="textColorSecondary">#666666</color>
+    <color name="backgroundColor">#F5F7FA</color>
+    
+    <!-- Main application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Primary brand colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        
+        <!-- Text and background colors -->
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:windowBackground">@color/backgroundColor</item>
+        
+        <!-- Status and navigation bar styling -->
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        
+        <!-- Typography -->
+        <item name="android:fontFamily">sans-serif</item>
+        
+        <!-- Window features -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    
+    <!-- Splash screen theme -->
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Background drawable for splash screen -->
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        
+        <!-- Maintain consistent branding with main theme -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowLightStatusBar">true</item>
+        
+        <!-- Ensure no action bar or title on splash screen -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>
