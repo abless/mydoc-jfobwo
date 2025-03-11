@@ -1,0 +1,80 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+
+# Build output
+dist/
+build/
+
+# React Native specific
+.expo/
+.expo-shared/
+*.jsbundle
+*.bundle
+*.hprof
+
+# Android specific
+android/app/build/
+android/build/
+android/.gradle/
+android/captures/
+
+# iOS specific
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/xcuserdata
+ios/*.xcodeproj/project.xcworkspace/xcuserdata
+ios/Podfile.lock
+ios/DerivedData/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.jest/
+e2e/
+__tests__/
+
+# Git and version control
+.git/
+.github/
+.gitignore
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Documentation
+docs/
+*.md
+
+# Temporary files
+tmp/
+temp/
+
+# Generated files
+*.generated.ts
+*.generated.tsx
+
+# Cache
+.eslintcache
+.babel-cache/
