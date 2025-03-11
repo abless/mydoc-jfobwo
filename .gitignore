@@ -1,0 +1,110 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+.jest/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+
+# MongoDB data directory (for local development)
+data/db/
+
+# Uploaded files (for local development)
+uploads/
+
+# React Native specific
+.expo/
+.expo-shared/
+*.jsbundle
+*.bundle
+*.hprof
+.watchmanconfig
+
+# Android specific
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/.idea/
+
+# iOS specific
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/xcuserdata
+ios/*.xcodeproj/project.xcworkspace/xcuserdata
+ios/Podfile.lock
+ios/DerivedData/
+
+# Metro bundler
+.metro-health-check*
+
+# Cache
+.eslintcache
+.babel-cache/
+
+# Generated files
+*.generated.ts
+*.generated.tsx
+
+# Detox E2E testing
+e2e/artifacts/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraformrc
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
