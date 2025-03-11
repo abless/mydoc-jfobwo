@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.healthadvisor">
+
+    <!-- Debug-only permissions -->
+    <!-- Allows drawing over other apps, needed for React Native debug overlay -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    
+    <!-- Needed for debugging over WiFi -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    
+    <!-- Required for API communication with backend services - also in main manifest 
+         but included here for completeness -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Debug-specific application settings -->
+    <application
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:targetApi="28"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:debuggable="true">
+        
+        <!-- No need to redefine activities or providers as they are inherited from the main manifest -->
+        
+    </application>
+
+</manifest>
