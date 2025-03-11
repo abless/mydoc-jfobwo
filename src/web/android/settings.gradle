@@ -1,0 +1,17 @@
+// Health Advisor Android application - Gradle settings file
+// This file configures the project structure and includes React Native modules
+
+// Set the project name
+rootProject.name = 'HealthAdvisor'
+
+// Enable feature preview for type-safe project accessors
+// This provides better type safety for project dependencies
+settings.enableFeaturePreview('TYPESAFE_PROJECT_ACCESSORS')
+
+// Include the main application module
+include ':app'
+
+// Apply React Native configuration and auto-linking
+// Uses react-native-gradle-plugin v0.71.0
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
