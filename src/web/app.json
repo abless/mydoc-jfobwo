@@ -1,0 +1,51 @@
+{
+  "name": "health-advisor",
+  "displayName": "Health Advisor",
+  "expo": {
+    "name": "Health Advisor",
+    "slug": "health-advisor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/logo.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./src/assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.healthadvisor",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to capture photos of meals and lab results for health tracking.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone to record symptom descriptions for health tracking.",
+        "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload images of meals and lab results for health tracking."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/logo.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.healthadvisor",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "react-native-camera",
+      "react-native-voice"
+    ]
+  }
+}
