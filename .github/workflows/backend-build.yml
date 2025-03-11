@@ -1,0 +1,156 @@
+name: Backend Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/backend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/backend/**'
+
+env:
+  NODE_VERSION: '18.x'
+  MONGODB_VERSION: '5.0'
+  COVERAGE_THRESHOLD: '85'
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/backend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: src/backend
+        run: npm ci
+      
+      - name: Lint code
+        working-directory: src/backend
+        run: npm run lint
+      
+      - name: Type check
+        working-directory: src/backend
+        run: npx tsc --noEmit
+      
+      - name: Run unit tests
+        working-directory: src/backend
+        run: npm run test:coverage
+      
+      - name: Check test coverage
+        working-directory: src/backend
+        run: npx jest --coverage --coverageThreshold='{"global":{"lines":${{ env.COVERAGE_THRESHOLD }},"functions":${{ env.COVERAGE_THRESHOLD }},"branches":${{ env.COVERAGE_THRESHOLD }},"statements":${{ env.COVERAGE_THRESHOLD }}}}'
+      
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: src/backend/coverage
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+      
+      - name: Check for vulnerabilities
+        working-directory: src/backend
+        run: npm audit --production
+
+  integration-tests:
+    name: Integration Tests
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:${{ env.MONGODB_VERSION }}
+        ports:
+          - 27017:27017
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/backend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: src/backend
+        run: npm ci
+      
+      - name: Run integration tests
+        working-directory: src/backend
+        run: npm run test:integration
+        env:
+          MONGODB_URI: mongodb://localhost:27017/health-advisor-test
+
+  build:
+    name: Build
+    needs: [lint-and-test, integration-tests, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/backend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: src/backend
+        run: npm ci
+      
+      - name: Build TypeScript
+        working-directory: src/backend
+        run: npm run build
+      
+      - name: Generate build ID
+        id: build-id
+        run: echo "id=build-$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+      
+      - name: Save build ID
+        run: echo ${{ steps.build-id.outputs.id }} > build-info.txt
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-dist
+          path: src/backend/dist
+      
+      - name: Upload build info
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-info
+          path: build-info.txt
+    
+    outputs:
+      build_id: ${{ steps.build-id.outputs.id }}
