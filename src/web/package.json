@@ -44,7 +44,7 @@
     "react-native-vector-icons": "^9.2.0",
     "react-native-vision-camera": "^2.15.4",
     "@react-native-voice/voice": "^3.2.4",
-    "uuid": "^9.0.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
